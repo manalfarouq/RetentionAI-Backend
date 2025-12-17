@@ -37,7 +37,5 @@ def create_jwt_token(user_id: int, username: str, email: str = None):
         "username": username,
         "exp": expire
     }
-    if email:
-        payload["email"] = email
     
     return jwt.encode(payload, settings.SK, algorithm=settings.ALG)

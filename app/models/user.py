@@ -10,4 +10,3 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
-    createat = Column(DateTime, default=datetime.utcnow, nullable=False)
