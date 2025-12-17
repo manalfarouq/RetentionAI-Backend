@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     
     # Variables optionnelles pour autres services
-    HF_TOKEN: str = "not_needed"
-    GEMINI_API_KEY: str = "not_needed"
+    HF_TOKEN: str 
+    GEMINI_API_KEY: str 
     
     class Config:
         env_file = ".env"
