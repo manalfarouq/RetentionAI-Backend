@@ -46,25 +46,20 @@ def encode_categorical(df):
 
 
 #* fct pour selectkbest pour choisir les K (nombre) de colonnes les plus pertinentes pour la prédiction
-def select_kbest_columns(df_encoded, df_original, k=5):
+def select_kbest_columns(X_encoded, y, k=5):
+    """
+    Sélectionne les k meilleures colonnes à partir des features déjà encodées.
+
+    X_encoded : DataFrame avec features numériques + catégorielles encodées
+    y         : Series binaire (0/1)
+    k         : nombre de features à sélectionner
+    """
     from sklearn.feature_selection import SelectKBest, f_classif
 
-    # Target encodée
-    y = (df_original['Attrition'] == 'Yes').astype(int)
 
-    # Features : on enlève toute colonne liée à Attrition
-    X = df_encoded.drop(
-        columns=[col for col in df_encoded.columns if 'Attrition' in col],
-        errors='ignore'
-    )
-
-    # SelectKBest
     selector = SelectKBest(score_func=f_classif, k=k)
-    selector.fit(X, y)
-
-    # Colonnes sélectionnées
-    selected_columns = X.columns[selector.get_support()]
-
+    selector.fit(X_encoded, y)
+    selected_columns = X_encoded.columns[selector.get_support()]
     return list(selected_columns)
 
 #* Fonction pour séparer le dataset en train/test
