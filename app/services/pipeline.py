@@ -43,7 +43,7 @@ def encoder_colonnes(df):
     return df_copie
 
 
-def selectionner_meilleures_colonnes(X, y, nombre=5):
+def select_kbest_columns(X, y, nombre=20):
     """Garde seulement les colonnes les plus importantes"""
     selecteur = SelectKBest(score_func=f_classif, k=nombre)
     selecteur.fit(X, y)
