@@ -1,24 +1,20 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+# routes/register_router.py
+from fastapi import APIRouter, HTTPException
 from ..schemas.SignupRequest_schema import SignupRequest
-from ..db.db_connection import get_db
+from ..db.db_connection import SessionLocal
 from ..models.user import User
-from ..auth.token_auth import create_jwt_token
+from ..auth.token_auth import create_token
 import bcrypt
 
 router = APIRouter()
 
-
 @router.post("/signup", status_code=201)
-def register(signup_request: SignupRequest, db: Session = Depends(get_db)):
+def register(signup_request: SignupRequest):
+    db = SessionLocal()
     try:
-        # Vérifier si l'utilisateur existe déjà
-        user = db.query(User).filter(User.username == signup_request.username).first()
-        if user:
-            raise HTTPException(
-                status_code=400,
-                detail="Ce nom d'utilisateur existe déjà"
-            )
+        # Vérifie si l'utilisateur existe
+        if db.query(User).filter(User.username == signup_request.username).first():
+            raise HTTPException(status_code=400, detail="Nom d'utilisateur existant")
 
         # Hash du mot de passe
         hashed_password = bcrypt.hashpw(
@@ -27,30 +23,24 @@ def register(signup_request: SignupRequest, db: Session = Depends(get_db)):
         ).decode("utf-8")
 
         # Création utilisateur
-        new_user = User(
-            username=signup_request.username,
-            password=hashed_password
-        )
-
+        new_user = User(username=signup_request.username, password=hashed_password)
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
 
-        # Token JWT
-        token = create_jwt_token(new_user.id, new_user.username)
+        token = create_token(new_user.id)
 
         return {
-            "message": "Utilisateur créé avec succès",
+            "message": "Utilisateur créé",
             "username": new_user.username,
             "token": token
         }
-
+    
     except HTTPException:
         raise
-
-    except Exception:
+    except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail="Erreur lors de l'inscription"
-        )
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    finally:
+        db.close()

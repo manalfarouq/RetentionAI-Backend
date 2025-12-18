@@ -4,6 +4,9 @@ import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from ..core.config import settings
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
 
 # Pour psycopg2 (actuel)
 def get_db_connection():
