@@ -23,3 +23,5 @@ numpy
 matplotlib
 scikit-learn
 seaborn
+imbalanced-learn
+google-generativeai 
