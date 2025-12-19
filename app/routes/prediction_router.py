@@ -50,9 +50,12 @@ def predict(request: PredictRequest, user_id: int = Depends(get_current_user)):
         
         # 6. Faire la prédiction (0 = pas de risque, 1 = risque)
         prediction = int(loaded_model.predict(features)[0])
+        
+        # Si ton modèle a predict_proba(), tu peux récupérer la probabilité :
+        probability = float(loaded_model.predict_proba(features)[0][1])  # probabilité de 1 (risque élevé)
 
         # 7. Sauvegarder l'historique
-        history = History(user_id=user_id, employee_id=employee.id)
+        history = History(user_id=user_id, employee_id=employee.id,probability=probability)
         db.add(history)
         
         # 8. Valider toutes les modifications
