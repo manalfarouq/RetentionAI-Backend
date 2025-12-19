@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
-
-Base = declarative_base()
+from ..db.db_connection import Base 
 
 class User(Base):
     __tablename__ = "users"
@@ -10,4 +9,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
-    createat = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relation avec AnalyseLog (utiliser string pour éviter l'import circulaire)
+    employee = relationship("Employee", back_populates="user")

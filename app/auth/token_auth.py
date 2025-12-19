@@ -1,43 +1,26 @@
-from fastapi import Header, HTTPException
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 from datetime import datetime, timedelta, timezone
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from ..core.config import settings
 
+security = HTTPBearer()
 
-def verify_token(token: str = Header(...)):
-    """
-    Vérifie le token JWT pour l'authentification.
-    """
+# Création du token
+def create_token(user_id: int):
+    expire = datetime.now(timezone.utc) + timedelta(hours=24)
+    payload = {"user_id": user_id, "exp": expire}
+    return jwt.encode(payload, settings.SK, algorithm=settings.ALG)
+
+# Vérification du token 
+def get_current_user(token: str):
     try:
         payload = jwt.decode(token, settings.SK, algorithms=[settings.ALG])
-        return payload
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Token invalide ou expiré")
-
-
-def get_user_id_from_token(token: str):
-    """
-    Extrait l'user_id depuis le token JWT.
-    """
-    try:
-        payload = jwt.decode(token, settings.SK, algorithms=[settings.ALG])
-        return payload.get("sub")
+        user_id = payload.get("user_id")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Token invalide")
+        return user_id
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expiré")
     except JWTError:
         raise HTTPException(status_code=401, detail="Token invalide")
-
-
-def create_jwt_token(user_id: int, username: str, email: str = None):
-    """
-    Crée un token JWT pour un utilisateur.
-    Réutilisable pour login et register.
-    """
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    payload = {
-        "sub": str(user_id),
-        "username": username,
-        "exp": expire
-    }
-    if email:
-        payload["email"] = email
-    
-    return jwt.encode(payload, settings.SK, algorithm=settings.ALG)

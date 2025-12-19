@@ -1,58 +1,46 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+# routes/register_router.py
+from fastapi import APIRouter, HTTPException
 from ..schemas.SignupRequest_schema import SignupRequest
-from ..database.db_connection import get_db
+from ..db.db_connection import SessionLocal
 from ..models.user import User
-from ..auth.token_auth import create_jwt_token
+from ..auth.token_auth import create_token
 import bcrypt
 
 router = APIRouter()
 
-
-@router.post("/Signup")
-def register(signup_request: SignupRequest, db: Session = Depends(get_db)):
-    """
-    Endpoint pour l'inscription des nouveaux utilisateurs avec SQLAlchemy.
-    """
+@router.post("/signup", status_code=201)
+def register(signup_request: SignupRequest):
+    db = SessionLocal()
     try:
-        # Vérifier si l'utilisateur existe déjà
-        existing_user = db.query(User).filter(User.username == signup_request.username).first()
-        
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Ce nom d'utilisateur existe déjà")
-        
-        # Hasher le mot de passe
+        # Vérifie si l'utilisateur existe
+        if db.query(User).filter(User.username == signup_request.username).first():
+            raise HTTPException(status_code=400, detail="Nom d'utilisateur existant")
+
+        # Hash du mot de passe
         hashed_password = bcrypt.hashpw(
-            signup_request.password.encode('utf-8'),
+            signup_request.password.encode("utf-8"),
             bcrypt.gensalt()
-        ).decode('utf-8')
-        
-        # Créer un nouvel utilisateur
-        new_user = User(
-            username=signup_request.username,
-            password=hashed_password,
-            email=signup_request.email
-        )
-        
-        # Ajouter à la session et sauvegarder
+        ).decode("utf-8")
+
+        # Création utilisateur
+        new_user = User(username=signup_request.username, password=hashed_password)
         db.add(new_user)
         db.commit()
-        db.refresh(new_user)  # Pour récupérer l'ID généré
-        
-        # Créer le token
-        token = create_jwt_token(new_user.id, new_user.username, new_user.email)
-        
+        db.refresh(new_user)
+
+        token = create_token(new_user.id)
+
         return {
-            "message": "Utilisateur créé avec succès",
+            "message": "Utilisateur créé",
             "username": new_user.username,
-            "email": new_user.email,
             "token": token
         }
     
     except HTTPException:
         raise
-    
     except Exception as e:
         db.rollback()
-        print(f"Erreur register: {str(e)}")
-        raise HTTPException(status_code=500, detail="Erreur lors de l'inscription")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    finally:
+        db.close()
