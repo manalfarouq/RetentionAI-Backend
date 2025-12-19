@@ -44,8 +44,9 @@ def generate_retention_plan(data: RetentionPlanRequest, token: str = Header(None
     try:
         prediction = History(
             user_id=user_id,
-            employee_id=None,
-            probability=float(data.churn_probability)
+            employee_id=data.employee_id,
+            probability=float(data.churn_probability),
+            retention_strategy="\n".join(resultat["retention_plan"])
         )
         db.add(prediction)
         db.commit()

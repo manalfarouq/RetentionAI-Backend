@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routes import login_router, register_router, prediction_router, retention_router
+from .routes import login_router, register_router, prediction_router, retention_router, get_all_employees_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -24,3 +24,4 @@ app.include_router(login_router.router)
 app.include_router(register_router.router)
 app.include_router(prediction_router.router)
 app.include_router(retention_router.router)
+app.include_router(get_all_employees_router.router)

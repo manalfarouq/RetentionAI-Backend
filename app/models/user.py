@@ -11,4 +11,4 @@ class User(Base):
     password = Column(String(255), nullable=False)
     
     # Relation avec AnalyseLog (utiliser string pour éviter l'import circulaire)
-    # employee = relationship("Employee", back_populates="user")
+    employee = relationship("Employee", back_populates="user")
