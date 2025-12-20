@@ -11,18 +11,21 @@ class PredictRequest(BaseModel):
     YearsInCurrentRole: int
     YearsWithCurrManager: int
 
-    # Ordinales avec valeurs autorisées
-    EnvironmentSatisfaction: Literal[1, 2, 3, 4]
-    JobInvolvement: Literal[1, 2, 3, 4]
-    JobSatisfaction: Literal[1, 2, 3, 4]
+    EnvironmentSatisfaction: int
+    JobInvolvement: int
+    JobSatisfaction: int
 
     BusinessTravel_Travel_Frequently: int
-    JobRole_Laboratory_Technician: int = Field(..., alias="JobRole_Laboratory Technician")
-    JobRole_Research_Director: int = Field(..., alias="JobRole_Research Director")
-    JobRole_Sales_Representative: int = Field(..., alias="JobRole_Sales Representative")
+
+    JobRole_Laboratory_Technician: int
+    JobRole_Research_Director: int
+    JobRole_Sales_Representative: int
+
     MaritalStatus_Divorced: int
     MaritalStatus_Married: int
     MaritalStatus_Single: int
     OverTime_No: int
     OverTime_Yes: int
+
+
 
