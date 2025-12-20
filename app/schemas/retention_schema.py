@@ -2,6 +2,7 @@
 from pydantic import BaseModel, Field
 
 class RetentionPlanRequest(BaseModel):
+    employee_id: int 
     age: int
     department: str
     job_role: str
