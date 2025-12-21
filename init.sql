@@ -42,9 +42,9 @@ CREATE TABLE IF NOT EXISTS history (
 );
 
 
-INSERT INTO users (username, password) 
-VALUES ('string', '$2b$12$dWPVzuOS/JEkW0S46BnrwOBshVxD9G7ZQX1/kpBU3VbW1HvCeSNte')
-ON CONFLICT (username) DO NOTHING;
+-- INSERT INTO users (username, password) 
+-- VALUES ('string', '$2b$12$dWPVzuOS/JEkW0S46BnrwOBshVxD9G7ZQX1/kpBU3VbW1HvCeSNte')
+-- ON CONFLICT (username) DO NOTHING;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO retention_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO retention_user;
