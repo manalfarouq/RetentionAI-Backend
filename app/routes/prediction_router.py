@@ -87,6 +87,7 @@ def predict(request: PredictRequest, user_id: int = Depends(get_current_user)):
             "employee_id": employee.id,
             "attrition": prediction,
             "risque": "Élevé" if prediction == 1 else "Faible",
+            "probabilite:":round(probability,2),
             "retention_strategy": retention_strategy
         }
 
