@@ -1,7 +1,5 @@
 -- init.sql
-CREATE DATABASE retention_db OWNER retention_user;
-
-\c retention_db
+-- Pas besoin de créer la DB, Docker le fait déjà avec POSTGRES_DB
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -37,9 +35,16 @@ CREATE TABLE IF NOT EXISTS employee (
 CREATE TABLE IF NOT EXISTS history (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
-    employee_id INTEGER NOT NULL REFERENCES employee(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    employee_id INTEGER REFERENCES employee(id), 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    probability FLOAT NOT NULL, 
+    retention_strategy TEXT  
 );
+
+
+-- INSERT INTO users (username, password) 
+-- VALUES ('string', '$2b$12$dWPVzuOS/JEkW0S46BnrwOBshVxD9G7ZQX1/kpBU3VbW1HvCeSNte')
+-- ON CONFLICT (username) DO NOTHING;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO retention_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO retention_user;
