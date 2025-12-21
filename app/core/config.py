@@ -20,3 +20,8 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
+
+SQLALCHEMY_DATABASE_URL = (
+    f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}"
+    f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+)

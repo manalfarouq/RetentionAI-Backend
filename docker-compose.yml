@@ -1,32 +1,29 @@
 services:
-  # ========== BASE DE DONNÉES ==========
-  db:
-    image: postgres:15
-    container_name: retentionai_db
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+  # ========== FRONTEND ==========
+  frontend: 
+    container_name: retention_frontend
+    build:
+      context: ../RetentionAI-frontend
+      dockerfile: Dockerfile
     ports:
-      - "5434:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "5173:5173"  
+    environment:
+      - VITE_API_URL=http://localhost:8001
+    depends_on:
+      - backend
     restart: unless-stopped
 
-  # ========== BACKEND (FastAPI) ==========
+  # ========== BACKEND ==========
   backend:
-    build: .
     container_name: retentionai_backend
+    build: 
+      context: ./
+      dockerfile: Dockerfile
     ports:
-      - "8001:8000"  # ← Remis à 8001
+      - "8001:8001"
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -36,8 +33,29 @@ services:
     volumes:
       - .:/app
       - /app/__pycache__
-      - /app/.venv
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    restart: unless-stopped
+
+  # ========== BASE DE DONNÉES ==========
+  db:
+    image: postgres:15-alpine
+    container_name: retentionai_db
+    env_file: ./.env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5434:5432"  # port hôte 5434 → port container 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$DB_USER -d $$DB_NAME"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 volumes:
