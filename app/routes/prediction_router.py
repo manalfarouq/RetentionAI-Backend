@@ -30,7 +30,7 @@ def predict(request: PredictRequest, user_id: int = Depends(get_current_user)):
         for key, value in data.items():
             employee_data[key.replace(" ", "_")] = value
 
-        # 3. Sauvegarder l’employé
+        # 3. Sauvegarder l'employé
         employee = Employee(**employee_data)
         db.add(employee)
         db.flush()
@@ -63,9 +63,14 @@ def predict(request: PredictRequest, user_id: int = Depends(get_current_user)):
             )
 
             if gemini_result and "retention_plan" in gemini_result:
-                retention_strategy = "\n".join(gemini_result["retention_plan"])
+                plan = gemini_result["retention_plan"]
+                if plan:
+                    if isinstance(plan, str):
+                        retention_strategy = plan
+                    else:
+                        retention_strategy = "\n".join(plan)
 
-        # 7. Sauvegarder l’historique
+        # 7. Sauvegarder l'historique
         history = History(
             user_id=user_id,
             employee_id=employee.id,
